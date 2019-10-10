@@ -1,0 +1,52 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include "sqlca.h"
+ 
+
+EXEC SQL	 BEGIN DECLARE SECTION;
+	char * serverid = "scott/root@orcl";  
+	int number ; //部门编号
+	char dname [20]; //部门名称
+	int ssn ; 
+	char fname [20];//员工的fname
+	char minit [5];//员工的minit
+	varchar lname [20];//员工的lname
+	varchar address [30];//员工的address
+	int salary;//薪水
+	int raise ; //增加的薪水
+EXEC SQL END DECLARE SECTION;
+void main()
+{
+	//嵌入式SQL必须以EXEC SQL开头
+	EXEC SQL connect :serverid;
+	//检测是否成功连接数据库
+	if(sqlca.sqlcode != 0)
+	{
+		printf("sql connect error\n");
+	}
+	printf("connect success\n"); 
+	printf("Enter the Department Name :");
+	scanf_s("%s", dname,15);
+	printf("输入的部门名称为: %s \n",dname);
+	//查询数据
+	EXEC SQL select DNUMBER INTO :number from dept where NAME = :dname ;
+	printf("查询出的部门编号%d \n",number) ;
+	EXEC SQL DECLARE EMPLOYEES CURSOR FOR SELECT SSN,FNAME,MINIT,LNAME,SALARY FROM emp WHERE DNUMBER = :number FOR UPDATE OF SALARY;  
+	EXEC SQL OPEN EMPLOYEES ;		
+	EXEC SQL FETCH EMPLOYEES INTO :ssn,:fname,:minit,:lname,:salary ; 
+	while(1 ){ 
+	printf("EMPLOYEE name is %d\t%s\t%s\t%d\n",ssn,fname,minit,salary) ; 
+	printf("ENTER THE RAISE AMOUNT :");
+	scanf_s("%d",&raise) ; 
+	printf("输入的涨薪: %d \n",raise);
+	EXEC SQL UPDATE emp SET SALARY = SALARY + :raise WHERE CURRENT OF EMPLOYEES;
+	printf("%s\n",sqlca.sqlerrm.sqlerrmc) ;
+	EXEC SQL FETCH EMPLOYEES INTO :ssn,:fname,:minit,:lname,:salary ;  
+	if(sqlca.sqlcode != 0){
+			break ; 
+	}
+	} 
+	EXEC SQL CLOSE EMPLOYEES ;		
+	EXEC SQL COMMIT RELEASE;
+	system("pause");
+}

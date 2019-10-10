@@ -1,0 +1,65 @@
+#include <stdio.h>
+#include "sqlca.h"
+#include <stdlib.h>
+ 
+
+int main()
+{
+	int loop;
+
+	EXEC SQL BEGIN DECLARE SECTION;
+	char * serverid = "C##ZQ/root@orclzq";
+	char dname[15], fname[15], lname[10], address[15];
+	char bdate[10], sex[2], minit[2];
+	int ssn;
+	float salary, raise;
+	int dno, dnumber;
+	int SQLCODE; char SQLSTATE[6];
+	EXEC SQL END DECLARE SECTION;
+
+	EXEC SQL connect :serverid;
+
+	if(sqlca.sqlcode != 0)
+	{
+		printf("sql connect error\n");
+	}
+
+	if (sqlca.sqlcode == 0) {
+		printf("connect succ\n");
+	}else{
+		printf("err");
+		return;
+	}
+	
+    printf("Enter the Department Name: ");
+    scanf_s("%s",dname,15);
+    printf("dname = |%s|\n",dname);
+    EXEC SQL
+        SELECT DNUMBER
+        INTO :dnumber
+        FROM DEPARTMENT WHERE DNAME = :dname;
+        //printf("%s\n",sqlca.sqlerrm.sqlerrmc) ; 
+         printf("dnum = %d\n",dnumber);
+    EXEC SQL DECLARE EMP CURSOR FOR
+        SELECT SSN,FNAME,MINIT,LNAME,SALARY
+        FROM EMPLOYEE WHERE DNO = :dnumber
+        FOR UPDATE OF SALARY;
+    EXEC SQL OPEN EMP;
+    EXEC SQL FETCH EMP
+    INTO :ssn,:fname,:minit,:lname,:salary;
+    while(sqlca.sqlcode == 0){
+        printf("\nEmployee name is:%s %s %s\n",fname,minit,lname);
+        printf("Enter the raise amount:");
+        scanf_s("%f",&raise);
+        EXEC SQL
+            UPDATE EMPLOYEE
+            SET SALARY = SALARY+:raise
+            WHERE CURRENT OF EMP;
+        EXEC SQL FETCH EMP
+        INTO :ssn,:fname,:minit,:lname,:salary;
+    }
+    EXEC SQL CLOSE EMP;
+    EXEC SQL COMMIT RELEASE;
+    system("pause");
+
+}

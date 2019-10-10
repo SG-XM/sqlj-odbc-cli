@@ -1,0 +1,43 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include "sqlca.h"
+ 
+
+EXEC SQL	 BEGIN DECLARE SECTION;
+char * serverid = "scott/root@orcl";
+int loop ;  
+	int ssn ; 
+	varchar fname[20];//员工的fname
+	varchar minit[5];//员工的minit
+	varchar lname[20];//员工的lname
+	varchar address[30];//员工的address
+	int sal;//薪水
+EXEC SQL END DECLARE SECTION;
+void main()
+{
+	//嵌入式SQL必须以EXEC SQL开头
+	EXEC SQL connect :serverid;
+	//检测是否成功连接数据库
+	if(sqlca.sqlcode != 0)
+	{
+		printf("sql connect error\n");
+	}
+	printf("connect success\n");
+	loop = 1 ; 
+	while(loop){ 
+		printf("Enter a Social Security Number :");
+		scanf_s("%d", &ssn);
+		//查询数据
+		EXEC SQL select FNAME,MINIT,LNAME,ADDRESS,SALARY into :fname,:minit,:lname,:address,:sal from emp where SSN=:ssn;
+		int count = sqlca.sqlerrd[2];//结果集行数
+		if(count > 0){
+			printf("%s\t%s\t%s\t%s\t%d\n",fname.arr,minit.arr,lname.arr,address.arr,sal);
+		}else{
+			printf("Socail Security Number does not Exist \n");
+		}
+		//printf("%s\n",sqlca.sqlerrm.sqlerrmc) ; debug
+		printf("More Social Security Number (Enter any non-zero numbers For yes,0 For no):");
+		scanf_s("%d", &loop); 
+	}
+	system("pause");
+}

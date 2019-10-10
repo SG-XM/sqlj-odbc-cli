@@ -1,0 +1,42 @@
+#include <stdio.h>
+#include "sqlca.h"
+#include <stdlib.h>
+
+void getline(char str[]){
+    int c,i;
+    i = 0;
+    while((c=getchar())!=EOF&&c!='\n')
+        str[i++]=c;
+    if(c==EOF&&i==0)
+        return;
+    str[i]='\0';
+    return;
+}
+
+int main()
+{
+	int loop;
+
+	EXEC SQL BEGIN DECLARE SECTION;
+		char * serverid = "C##ZQ/root@orclzq";
+		char sqlupdatestring[256];
+	EXEC SQL END DECLARE SECTION;
+
+	EXEC SQL connect :serverid;
+
+	if (sqlca.sqlcode == 0) {
+		printf("connect succ\n");
+	}else{
+		printf("err");
+		return;
+	}
+	printf("Enter the Update Command: ");
+	getline(sqlupdatestring);
+	printf("%s",sqlupdatestring);
+	EXEC SQL PREPARE sqlcommand FROM :sqlupdatestring;
+	printf("%s\n",sqlca.sqlerrm.sqlerrmc) ;
+	EXEC SQL EXECUTE sqlcommand;
+	printf("%s\n",sqlca.sqlerrm.sqlerrmc) ;
+    EXEC SQL COMMIT RELEASE;
+	system("pause");
+}

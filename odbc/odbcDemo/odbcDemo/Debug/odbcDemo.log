@@ -1,0 +1,5 @@
+﻿  CLI-1.c
+c:\sqlj\odbc\odbcdemo\odbcdemo\cli-1.c(16): warning C4013: “SQLSetEnvAttr”未定义；假设外部返回 int
+CLI-1.obj : error LNK2019: 无法解析的外部符号 _SQLSetEnvAttr，该符号在函数 _printSal 中被引用
+D:\sqlj\lib\orasql12.lib : warning LNK4272: 库计算机类型“x64”与目标计算机类型“x86”冲突
+C:\sqlj\odbc\odbcDemo\Debug\odbcDemo.exe : fatal error LNK1120: 1 个无法解析的外部命令

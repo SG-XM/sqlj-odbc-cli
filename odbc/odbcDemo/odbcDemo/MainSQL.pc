@@ -1,0 +1,43 @@
+#include <stdio.h>
+#include "sqlca.h"
+
+int main()
+{
+	int loop;
+
+	EXEC SQL BEGIN DECLARE SECTION;
+	char * serverid = "C##ZQ/root@orclzq";
+	char dname[10], fname[10], lname[10], address[10];
+	char bdate[10], sex[2], minit[2];
+	int ssn;
+	float salary, raise;
+	int dno, dnumber;
+	int SQLCODE; char SQLSTATE[6];
+	EXEC SQL END DECLARE SECTION;
+
+	EXEC SQL connect :serverid;
+
+	if (sqlca.sqlcode == 0) {
+		printf("connect succ\n");
+	}else{
+		printf("err");
+		return;
+	}
+	
+	loop = 1;
+	while(loop){
+		printf("\nEnter a Social Security Number:");
+		scanf_s("%d",&ssn);
+		EXEC SQL 
+			SELECT FNAME,MINIT,LNAME,ADDRESS,SALARY
+			INTO :fname,:minit,:lname,:address,:salary
+			FROM EMPLOYEE WHERE SSN = :ssn;
+		if(sqlca.sqlcode == 0)
+			printf("%s,%s,%s,%s,%f\n",fname,minit,lname,address,salary);
+		else 
+			printf("Social Security Number does not exist: %d",ssn);
+		printf("More SSN (enter 1 for yes,0 for no): ");
+		scanf_s("%d",&loop);
+	}
+
+}
